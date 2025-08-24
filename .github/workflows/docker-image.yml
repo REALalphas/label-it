@@ -15,4 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag label-it:$(date +%s)
+      run: |
+        docker login ghcr.io -u REALalphas -p ${{ secrets.CR_PAT }}
+        docker build . --file Dockerfile --tag label-it:$(date +%s)
+        docker push ghcr.io/REALalphas/label-it:latest
