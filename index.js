@@ -12,7 +12,6 @@ require('dotenv').config()
 const config = {
     snipeItUrl: process.env.SNIPEIT_URL || 'https://demo.snipeitapp.com',
     snipeItToken: process.env.SNIPEIT_API_TOKEN,
-    chromePath: process.env.CHROMIUM_PATH,
     port: process.env.PORT || 3000,
     host: process.env.HOST || '0.0.0.0',
     logLevel: process.env.LOG_LEVEL || 'info',
@@ -313,7 +312,6 @@ app.post('/generate', async (request, reply) => {
         browser = await puppeteer.launch({
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
             headless: 'new',
-            executablePath: config.chromePath,
         })
         const page = await browser.newPage()
 

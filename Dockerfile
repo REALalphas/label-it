@@ -1,8 +1,4 @@
-FROM node:24-slim
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    chromium \
-    && rm -rf /var/lib/apt/lists/*
-
+FROM ghcr.io/puppeteer/puppeteer:latest
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
