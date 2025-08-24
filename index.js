@@ -8,6 +8,9 @@ const bwipjs = require('bwip-js')
 // Load environment variables
 require('dotenv').config()
 
+const environment = process.env.NODE_ENV
+const isProduction = environment === 'production'
+
 // Configuration from environment variables
 const config = {
     snipeItUrl: process.env.SNIPEIT_URL || 'https://demo.snipeitapp.com',
@@ -310,8 +313,9 @@ app.post('/generate', async (request, reply) => {
 
         // Generate PDF or PNG using Puppeteer
         browser = await puppeteer.launch({
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
             headless: 'new',
+            ...(isProduction && { executablePath: process.env.CHROMIUM_PATH }),
         })
         const page = await browser.newPage()
 
