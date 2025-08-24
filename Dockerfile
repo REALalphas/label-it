@@ -35,4 +35,14 @@ EXPOSE 3000
 
 # Install system dependencies as root.
 USER root
+
+# Overriding the cache directory to install the deps for the Chrome
+# version installed for pptruser.
+RUN PUPPETEER_CACHE_DIR=/home/pptruser/.cache/puppeteer \
+    npx puppeteer browsers install chrome --install-deps
+
+USER $PPTRUSER_UID
+
+RUN node -e "require('child_process').execSync(require('puppeteer').executablePath() + ' --credits', {stdio: 'inherit'})" > THIRD_PARTY_NOTICES
+
 CMD ["npm", "start"]
