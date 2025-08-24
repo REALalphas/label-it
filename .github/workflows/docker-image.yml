@@ -17,5 +17,5 @@ jobs:
     - name: Build the Docker image
       run: |
         docker login ghcr.io -u REALalphas -p ${{ secrets.CR_PAT }}
-        docker build . --file Dockerfile --tag label-it:$(date +%s)
+        docker build . --file Dockerfile --tag label-it:latest
         docker push ghcr.io/realalphas/label-it:latest
