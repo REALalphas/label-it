@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            @page {
+                size: 15mm 15mm;
+                margin: 0.5mm;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+
+                margin: 0;
+
+                width: 15mm;
+                height: 15mm;
+                overflow: hidden;
+            }
+            p {
+                font-family: monospace;
+                font-weight: bold;
+                font-size: 8pt;
+
+                margin: 0;
+                margin-top: 2px;
+            }
+            img {
+                height: 10mm;
+                image-rendering: pixelated;
+            } /* pixelated для четкости */
+        </style>
+    </head>
+    <body>
+        <img src="{{datamatrix_image}}" />
+        <p>{{asset_tag}}</p>
+    </body>
+</html>

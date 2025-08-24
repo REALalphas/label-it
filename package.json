@@ -1,0 +1,35 @@
+{
+    "name": "label-it",
+    "version": "0.1",
+    "description": "Asset label generator with Snipe-IT integration. Supports multiple label formats including QR codes, barcodes, and DataMatrix codes.",
+    "main": "index.js",
+    "scripts": {
+        "start": "node .",
+        "dev": "node . --watch"
+    },
+    "keywords": [
+        "asset-management",
+        "label-generator",
+        "snipe-it",
+        "barcode",
+        "qr-code",
+        "pdf-generation",
+        "inventory"
+    ],
+    "author": "AlphaS",
+    "license": "AGPL-3.0-or-later",
+    "type": "commonjs",
+    "dependencies": {
+        "@fastify/formbody": "^8.0.2",
+        "@fastify/static": "^8.2.0",
+        "axios": "^1.11.0",
+        "bwip-js": "^4.7.0",
+        "dotenv": "^17.2.1",
+        "fastify": "^5.5.0",
+        "pino-pretty": "^13.1.1",
+        "puppeteer": "^24.17.0"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

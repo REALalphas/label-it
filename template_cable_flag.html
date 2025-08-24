@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            @page {
+                size: 12mm 40mm;
+                margin: 0;
+            }
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                font-size: 8pt;
+                display: flex;
+            }
+            .half {
+                width: 50%;
+                height: 100%;
+                box-sizing: border-box;
+                padding: 2mm;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            .left {
+                text-align: left;
+            }
+            .right {
+                text-align: right;
+            } /* Правая часть будет клеиться поверх левой */
+            p {
+                margin: 1mm 0;
+            }
+            img {
+                max-width: 15mm;
+                max-height: 15mm;
+                image-rendering: pixelated;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="half left">
+            <p><strong>{{asset_tag}}</strong></p>
+            <p>{{asset_name}}</p>
+        </div>
+        <!-- Эта часть заворачивается и клеится с обратной стороны, создавая флажок -->
+        <div class="half right">
+            <p><strong>{{asset_tag}}</strong></p>
+            <p>{{asset_name}}</p>
+        </div>
+    </body>
+</html>

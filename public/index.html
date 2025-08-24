@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Asset Label Generator</title>
+        <style>
+            :root {
+                --bg-color: #f8f9fa;
+                --surface-color: #ffffff;
+                --text-color: #212529;
+                --border-color: #dee2e6;
+                --shadow-color: rgba(0, 0, 0, 0.1);
+                --group-header-color: #e9ecef;
+                --primary-color: #007bff;
+                --success-color: #28a745;
+                --warning-color: #ffc107;
+                --danger-color: #dc3545;
+            }
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                    'Helvetica Neue', Arial, sans-serif;
+                margin: 0;
+                background-color: var(--bg-color);
+                color: var(--text-color);
+                line-height: 1.5;
+            }
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .header {
+                text-align: center;
+                margin-bottom: 30px;
+            }
+            .header h1 {
+                color: var(--text-color);
+                margin: 0 0 10px 0;
+                font-weight: 600;
+            }
+            .header p {
+                color: #6c757d;
+                margin: 0;
+                font-size: 16px;
+            }
+            .controls {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                padding: 20px;
+                background-color: var(--surface-color);
+                border-radius: 12px;
+                box-shadow: 0 2px 10px var(--shadow-color);
+                margin-bottom: 30px;
+                border: 1px solid var(--border-color);
+            }
+            .search-container {
+                flex-grow: 1;
+                min-width: 250px;
+            }
+            .search-container label {
+                display: block;
+                font-weight: 500;
+                margin-bottom: 5px;
+                color: var(--text-color);
+            }
+            #search {
+                width: 100%;
+                padding: 12px 16px;
+                font-size: 16px;
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                transition: border-color 0.2s ease;
+                box-sizing: border-box;
+            }
+            #search:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            }
+            .control-group {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                min-width: 150px;
+            }
+            .control-group label {
+                font-weight: 500;
+                color: var(--text-color);
+                font-size: 14px;
+            }
+            select {
+                padding: 12px 16px;
+                border-radius: 8px;
+                border: 2px solid var(--border-color);
+                background-color: var(--surface-color);
+                font-size: 14px;
+                transition: border-color 0.2s ease;
+                cursor: pointer;
+            }
+            select:focus {
+                outline: none;
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            }
+            .stats {
+                display: flex;
+                gap: 20px;
+                align-items: center;
+                font-size: 14px;
+                color: #6c757d;
+            }
+            .stat-item {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+            .group-header {
+                margin: 30px 0 15px 0;
+                padding: 12px 16px;
+                background: linear-gradient(
+                    135deg,
+                    var(--group-header-color) 0%,
+                    #f8f9fa 100%
+                );
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 16px;
+                text-transform: uppercase;
+                color: #495057;
+                border-left: 4px solid var(--primary-color);
+                letter-spacing: 0.5px;
+            }
+            #asset-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+                gap: 20px;
+                margin-bottom: 40px;
+            }
+            .asset-card {
+                background-color: var(--surface-color);
+                border-radius: 12px;
+                box-shadow: 0 4px 12px var(--shadow-color);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                border: 1px solid var(--border-color);
+                transition: all 0.3s ease;
+                position: relative;
+            }
+            .asset-card:hover {
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+                transform: translateY(-2px);
+            }
+            .asset-card.deleted {
+                opacity: 0.6;
+                background-color: #f8f9fa;
+            }
+            .asset-image {
+                width: 100%;
+                height: 200px;
+                background-color: var(--bg-color);
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                position: relative;
+            }
+            .asset-image::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(
+                    45deg,
+                    transparent 49%,
+                    rgba(0, 0, 0, 0.02) 50%,
+                    transparent 51%
+                );
+            }
+            .asset-content {
+                padding: 20px;
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+            }
+            .asset-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 15px;
+                margin-bottom: 15px;
+            }
+            .asset-header h3 {
+                margin: 0;
+                font-size: 18px;
+                font-weight: 600;
+                word-break: break-word;
+                color: var(--text-color);
+                line-height: 1.3;
+            }
+            .asset-tag {
+                font-size: 13px;
+                font-weight: 600;
+                background: linear-gradient(
+                    135deg,
+                    var(--primary-color) 0%,
+                    #0056b3 100%
+                );
+                color: white;
+                padding: 6px 12px;
+                border-radius: 20px;
+                flex-shrink: 0;
+                font-family: 'Courier New', monospace;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+            }
+            .asset-details {
+                font-size: 14px;
+                color: #6c757d;
+                margin-bottom: 20px;
+                display: flex;
+                gap: 8px;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .asset-details .separator {
+                color: var(--border-color);
+                font-weight: bold;
+            }
+            .asset-details .category {
+                background-color: var(--bg-color);
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: 500;
+            }
+            .asset-details .status {
+                background-color: var(--success-color);
+                color: white;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: 500;
+            }
+            .previews-container {
+                margin-top: auto;
+                padding-top: 20px;
+                border-top: 2px solid var(--bg-color);
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+                gap: 15px;
+                align-items: center;
+                justify-items: center;
+            }
+            .preview-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                width: 100%;
+            }
+            .preview-box {
+                height: 90px;
+                width: 100%;
+                background-color: var(--bg-color);
+                border: 2px dashed var(--border-color);
+                border-radius: 8px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                overflow: hidden;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                position: relative;
+            }
+            .preview-box:hover {
+                background-color: #e3f2fd;
+                border-color: var(--primary-color);
+                transform: scale(1.05);
+            }
+            .preview-box img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+            }
+            .preview-box .loading {
+                color: #6c757d;
+                font-size: 12px;
+                animation: pulse 1.5s ease-in-out infinite;
+            }
+            .preview-box .error {
+                color: var(--danger-color);
+                font-size: 20px;
+                font-weight: bold;
+            }
+            @keyframes pulse {
+                0% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.5;
+                }
+                100% {
+                    opacity: 1;
+                }
+            }
+            .preview-item p {
+                margin: 0;
+                font-size: 12px;
+                font-weight: 500;
+                color: #495057;
+                text-align: center;
+            }
+            .loader {
+                text-align: center;
+                padding: 60px 20px;
+                font-size: 18px;
+                color: #6c757d;
+            }
+            .loader .spinner {
+                border: 4px solid var(--border-color);
+                border-top: 4px solid var(--primary-color);
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px auto;
+            }
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+            .no-results {
+                text-align: center;
+                padding: 60px 20px;
+                color: #6c757d;
+            }
+            .no-results h3 {
+                margin: 0 0 10px 0;
+                color: var(--text-color);
+            }
+            .no-results p {
+                margin: 0;
+                font-size: 16px;
+            }
+            .error-message {
+                background-color: #f8d7da;
+                color: #721c24;
+                padding: 20px;
+                border-radius: 8px;
+                border: 1px solid #f5c6cb;
+                text-align: center;
+                margin: 20px 0;
+            }
+            @media (max-width: 768px) {
+                .container {
+                    padding: 15px;
+                }
+                .controls {
+                    flex-direction: column;
+                    padding: 15px;
+                }
+                .search-container {
+                    min-width: auto;
+                }
+                .control-group {
+                    min-width: auto;
+                }
+                .stats {
+                    justify-content: center;
+                    flex-wrap: wrap;
+                }
+                #asset-grid {
+                    grid-template-columns: 1fr;
+                    gap: 15px;
+                }
+                .asset-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 10px;
+                }
+                .asset-tag {
+                    align-self: flex-end;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Asset Label Generator</h1>
+                <p>
+                    Professional label generation system with Snipe-IT
+                    integration
+                </p>
+            </div>
+
+            <div class="controls">
+                <div class="search-container">
+                    <label for="search">Search Assets</label>
+                    <input
+                        type="text"
+                        id="search"
+                        placeholder="Search by name, tag, or serial number..."
+                    />
+                </div>
+                <div class="control-group">
+                    <label for="group-by">Group By</label>
+                    <select id="group-by">
+                        <option value="none">No Grouping</option>
+                        <option value="category">Category</option>
+                        <option value="model">Model</option>
+                        <option value="status_label">Status</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="sort-by">Sort By</label>
+                    <select id="sort-by">
+                        <option value="id-desc">Newest First</option>
+                        <option value="id-asc">Oldest First</option>
+                        <option value="name-asc">Name (A-Z)</option>
+                        <option value="name-desc">Name (Z-A)</option>
+                    </select>
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span>📊</span>
+                        <span id="asset-count">0 assets</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>👁️</span>
+                        <span id="visible-count">0 visible</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="asset-container">
+                <div class="loader">
+                    <div class="spinner"></div>
+                    <div>Loading assets...</div>
+                </div>
+            </div>
+        </div>
+
+        <form
+            id="generate-form"
+            action="/generate"
+            method="POST"
+            target="_blank"
+            style="display: none"
+        >
+            <input type="hidden" name="asset_id" id="form-asset-id" />
+            <input type="hidden" name="template_type" id="form-template-type" />
+        </form>
+
+        <script>
+            let allAssets = []
+            const container = document.getElementById('asset-container')
+            const searchInput = document.getElementById('search')
+            const groupBySelect = document.getElementById('group-by')
+            const sortBySelect = document.getElementById('sort-by')
+            const assetCountEl = document.getElementById('asset-count')
+            const visibleCountEl = document.getElementById('visible-count')
+            let previewCache = {}
+
+            // Available label types with professional descriptions
+            const LABEL_TYPES = [
+                { id: 'default', name: 'Standard', description: '50×25mm' },
+                { id: 'medium', name: 'Medium', description: '40×30mm' },
+                {
+                    id: 'datamatrix',
+                    name: 'DataMatrix',
+                    description: '15×15mm',
+                },
+                {
+                    id: 'cable_flag',
+                    name: 'Cable Flag',
+                    description: '12×40mm',
+                },
+            ]
+
+            function generateCardHtml(asset) {
+                const displayName =
+                    asset.name || asset.model.name || 'Unnamed Asset'
+                const imageUrl = asset.image ? `url(${asset.image})` : 'none'
+                const statusClass = asset.deleted_at ? 'deleted' : ''
+
+                // Generate preview HTML for all label types
+                const previewsHtml = LABEL_TYPES.map(
+                    (label) => `
+                <div class="preview-item">
+                    <div class="preview-box"
+                         id="preview-${asset.id}-${label.id}"
+                         onclick="generateLabel(${asset.id}, '${label.id}')"
+                         title="Generate ${label.name} label (${label.description})">
+                        <div class="loading">●●●</div>
+                    </div>
+                    <p>${label.name}<br><small>${label.description}</small></p>
+                </div>
+            `,
+                ).join('')
+
+                return `
+            <div class="asset-card ${statusClass}">
+                <div class="asset-image" style="background-image: ${imageUrl}"></div>
+                <div class="asset-content">
+                    <div class="asset-header">
+                        <h3>${displayName}</h3>
+                        <span class="asset-tag">${asset.asset_tag}</span>
+                    </div>
+                    <div class="asset-details">
+                        <span class="category">${asset.category.name}</span>
+                        <span class="separator">•</span>
+                        <span class="status">${asset.status_label.name}</span>
+                        ${asset.serial ? `<span class="separator">•</span><small>S/N: ${asset.serial}</small>` : ''}
+                    </div>
+                    <div class="previews-container">${previewsHtml}</div>
+                </div>
+            </div>`
+            }
+
+            function renderAssets() {
+                let assetsToRender = [...allAssets]
+                const searchTerm = searchInput.value.toLowerCase()
+                const sortBy = sortBySelect.value
+                const groupBy = groupBySelect.value
+
+                // Filter assets
+                assetsToRender = assetsToRender.filter((asset) => {
+                    if (asset.deleted_at !== null) return false
+                    const displayName = (
+                        asset.name ||
+                        asset.model.name ||
+                        ''
+                    ).toLowerCase()
+                    const assetTag = (asset.asset_tag || '').toLowerCase()
+                    const serial = (asset.serial || '').toLowerCase()
+                    const category = (asset.category.name || '').toLowerCase()
+
+                    return (
+                        searchTerm === '' ||
+                        displayName.includes(searchTerm) ||
+                        assetTag.includes(searchTerm) ||
+                        serial.includes(searchTerm) ||
+                        category.includes(searchTerm)
+                    )
+                })
+
+                // Sort assets
+                assetsToRender.sort((a, b) => {
+                    const nameA = a.name || a.model.name || ''
+                    const nameB = b.name || b.model.name || ''
+                    switch (sortBy) {
+                        case 'id-asc':
+                            return a.id - b.id
+                        case 'name-asc':
+                            return nameA.localeCompare(nameB)
+                        case 'name-desc':
+                            return nameB.localeCompare(nameA)
+                        default: // id-desc
+                            return b.id - a.id
+                    }
+                })
+
+                // Update statistics
+                assetCountEl.textContent = `${allAssets.filter((a) => !a.deleted_at).length} assets`
+                visibleCountEl.textContent = `${assetsToRender.length} visible`
+
+                if (assetsToRender.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-results">
+                            <h3>No assets found</h3>
+                            <p>Try adjusting your search criteria or check if assets exist in Snipe-IT.</p>
+                        </div>
+                    `
+                    return
+                }
+
+                let html = ''
+                if (groupBy === 'none') {
+                    html = `<div id="asset-grid">${assetsToRender.map((asset) => generateCardHtml(asset)).join('')}</div>`
+                } else {
+                    // Group assets
+                    const groups = {}
+                    assetsToRender.forEach((asset) => {
+                        const groupKey = getGroupKey(asset, groupBy)
+                        if (!groups[groupKey]) groups[groupKey] = []
+                        groups[groupKey].push(asset)
+                    })
+
+                    const sortedGroupKeys = Object.keys(groups).sort()
+                    for (const key of sortedGroupKeys) {
+                        html += `<div class="group-header">${key} (${groups[key].length})</div>`
+                        html += `<div id="asset-grid">${groups[key].map((asset) => generateCardHtml(asset)).join('')}</div>`
+                    }
+                }
+
+                container.innerHTML = html
+
+                // Load previews for visible assets
+                assetsToRender.forEach((asset) => {
+                    LABEL_TYPES.forEach((label) => {
+                        showPreview(asset.id, label.id)
+                    })
+                })
+            }
+
+            async function showPreview(assetId, templateType) {
+                const previewDiv = document.getElementById(
+                    `preview-${assetId}-${templateType}`,
+                )
+                if (!previewDiv) return
+
+                const cacheKey = `${assetId}-${templateType}`
+
+                // Check cache first
+                if (previewCache[cacheKey]) {
+                    previewDiv.innerHTML = `<img src="${previewCache[cacheKey]}" alt="Label preview">`
+                    return
+                }
+
+                try {
+                    const response = await fetch('/generate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            Accept: 'image/png',
+                        },
+                        body: `asset_id=${assetId}&template_type=${templateType}`,
+                    })
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`)
+                    }
+
+                    const imageBlob = await response.blob()
+                    const imageUrl = URL.createObjectURL(imageBlob)
+                    previewCache[cacheKey] = imageUrl
+                    previewDiv.innerHTML = `<img src="${imageUrl}" alt="Label preview">`
+                } catch (error) {
+                    console.error(
+                        `Preview generation failed for asset ${assetId}:`,
+                        error,
+                    )
+                    previewDiv.innerHTML = '<span class="error">✕</span>'
+                }
+            }
+
+            function getGroupKey(asset, groupBy) {
+                switch (groupBy) {
+                    case 'category':
+                        return asset.category.name
+                    case 'model':
+                        return asset.model.name
+                    case 'status_label':
+                        return asset.status_label.name
+                    default:
+                        return 'All Assets'
+                }
+            }
+
+            function generateLabel(assetId, templateType) {
+                document.getElementById('form-asset-id').value = assetId
+                document.getElementById('form-template-type').value =
+                    templateType
+                document.getElementById('generate-form').submit()
+            }
+
+            async function fetchAssets() {
+                try {
+                    container.innerHTML = `
+                        <div class="loader">
+                            <div class="spinner"></div>
+                            <div>Loading assets from Snipe-IT...</div>
+                        </div>
+                    `
+
+                    const response = await fetch('/assets')
+                    if (!response.ok) {
+                        const errorData = await response
+                            .json()
+                            .catch(() => ({ error: 'Unknown error' }))
+                        throw new Error(
+                            errorData.error || `HTTP ${response.status}`,
+                        )
+                    }
+
+                    allAssets = await response.json()
+
+                    if (!Array.isArray(allAssets)) {
+                        throw new Error('Invalid response format')
+                    }
+
+                    console.log(
+                        `Loaded ${allAssets.length} assets from Snipe-IT`,
+                    )
+                    renderAssets()
+                } catch (error) {
+                    console.error('Failed to fetch assets:', error)
+                    container.innerHTML = `
+                        <div class="error-message">
+                            <h3>Failed to load assets</h3>
+                            <p><strong>Error:</strong> ${error.message}</p>
+                            <p>Please check your Snipe-IT connection and API token configuration.</p>
+                            <button onclick="fetchAssets()" style="margin-top: 15px; padding: 10px 20px; background: var(--primary-color); color: white; border: none; border-radius: 5px; cursor: pointer;">
+                                Retry
+                            </button>
+                        </div>
+                    `
+                }
+            }
+
+            // Event listeners
+            searchInput.addEventListener('input', renderAssets)
+            groupBySelect.addEventListener('change', renderAssets)
+            sortBySelect.addEventListener('change', renderAssets)
+
+            // Initialize the application
+            fetchAssets()
+        </script>
+    </body>
+</html>

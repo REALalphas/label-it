@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <style>
+            @page {
+                size: 50mm 25mm;
+                margin: 0;
+            }
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                font-size: 8pt;
+                display: flex;
+                width: 100%;
+                height: 100%;
+                padding: 1mm;
+                box-sizing: border-box; /* Учитываем padding в расчетах ширины */
+                gap: 1mm;
+            }
+            .info {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                flex: 1; /* Позволяет элементу занимать все доступное пространство */
+                min-width: 0; /* Позволяет элементу сжиматься меньше его содержимого */
+            }
+            .data {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                text-align: left;
+            }
+            p {
+                margin: 0;
+                font-size: 9pt;
+                white-space: nowrap;
+            }
+            p.title {
+                font-size: 8pt;
+            }
+            .qr-code {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                /* Задаем жесткую ширину, чтобы .info мог рассчитать оставшееся место */
+                width: 16mm;
+                flex-shrink: 0; /* Запрещаем этому блоку сжиматься */
+                gap: 1mm;
+            }
+            .qr-code > img {
+                aspect-ratio: 1;
+                width: 16mm;
+                height: auto;
+                image-rendering: pixelated;
+            }
+            .tag-under-qr {
+                margin: 0;
+                font-family: monospace;
+                font-weight: bold;
+                font-size: 7.4pt;
+            }
+            .adaptive-text {
+                width: 100%;
+                height: 10pt; /* Немного увеличим высоту для лучшего вида */
+            }
+            .barcode-section {
+                width: 30mm;
+                margin-top: 1.5mm;
+            }
+            .barcode-section img {
+                width: 30mm;
+                height: 3mm;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="qr-code">
+            <img src="{{qr_code_image}}" />
+            <p class="tag-under-qr">{{asset_tag}}</p>
+        </div>
+        <div class="info">
+            <div class="data">
+                <p class="title"><b>{{company_name}}</b></p>
+                <!-- SVG-элементы для текста -->
+                <svg
+                    class="adaptive-text"
+                    viewBox="0 0 100 10"
+                    preserveAspectRatio="xMinYMin meet"
+                >
+                    <text
+                        x="0"
+                        y="9"
+                        font-family="sans-serif"
+                        font-size="9"
+                        fill="black"
+                    >
+                        {{first_line}}
+                    </text>
+                </svg>
+                <svg
+                    class="adaptive-text"
+                    viewBox="0 0 100 10"
+                    preserveAspectRatio="xMinYMin meet"
+                >
+                    <text
+                        x="0"
+                        y="9"
+                        font-family="sans-serif"
+                        font-size="9"
+                        fill="black"
+                    >
+                        {{second_line}}
+                    </text>
+                </svg>
+                <svg
+                    class="adaptive-text"
+                    viewBox="0 0 100 10"
+                    preserveAspectRatio="xMinYMin meet"
+                >
+                    <text
+                        x="0"
+                        y="9"
+                        font-family="sans-serif"
+                        font-size="9"
+                        fill="black"
+                    >
+                        {{third_line}}
+                    </text>
+                </svg>
+                <svg
+                    class="adaptive-text"
+                    viewBox="0 0 100 10"
+                    preserveAspectRatio="xMinYMin meet"
+                >
+                    <text
+                        x="0"
+                        y="9"
+                        font-family="sans-serif"
+                        font-size="9"
+                        fill="black"
+                    >
+                        {{fourth_line}}
+                    </text>
+                </svg>
+            </div>
+
+            <div class="barcode-section">
+                <img src="{{barcode_image}}" />
+            </div>
+        </div>
+
+        <!-- --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ JAVASCRIPT --- -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Находим все текстовые элементы, которые нужно адаптировать
+                const textElements = document.querySelectorAll(
+                    '.adaptive-text text',
+                )
+
+                textElements.forEach((text) => {
+                    // Ширина контейнера viewBox, которую текст не должен превышать
+                    const containerWidth =
+                        text.parentElement.viewBox.baseVal.width
+                    // Вычисляем фактическую "естественную" длину текста
+                    const textWidth = text.getComputedTextLength()
+
+                    // Если текст шире контейнера, применяем атрибуты для сжатия
+                    if (textWidth > containerWidth) {
+                        text.setAttribute('textLength', containerWidth)
+                        text.setAttribute('lengthAdjust', 'spacingAndGlyphs')
+                    }
+                    // В противном случае ничего не делаем, и текст остается своей естественной ширины
+                })
+            })
+        </script>
+    </body>
+</html>
