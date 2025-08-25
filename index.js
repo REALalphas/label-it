@@ -82,6 +82,7 @@ app.get('/assets', async (request, reply) => {
         app.log.info(`Retrieved ${response.data.rows.length} assets`)
         return response.data.rows
     } catch (error) {
+        console.error(error)
         app.log.error(
             { error: error.message },
             'Failed to fetch assets from Snipe-IT',
