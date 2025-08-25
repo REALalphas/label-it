@@ -252,3 +252,18 @@ For support and questions:
 - Collapsible interface controls
 - Multi-asset selection system
 - Responsive design with mobile support
+
+### Version 0.3
+- **Mobile-First Interface Redesign**: Completely restructured interface for optimal mobile experience
+- **Smart Selection Controls**: Selection tools only appear when assets are selected, reducing interface clutter
+- **Inline Search Controls**: Moved grouping and sorting controls directly next to search bar for easier access
+- **Mobile Optimizations**: 
+  - Hidden grouping controls on mobile devices to simplify interface
+  - Improved touch targets and responsive layout
+  - Better statistics display with proper spacing
+- **Enhanced Asset Tags**: More readable asset tags with improved contrast and less rounded styling
+- **Streamlined Navigation**: Removed collapsible panels in favor of contextual controls
+- **Smart File Naming**: 
+  - Asset-specific PDF names with sanitized asset tags and names
+  - Timestamp-based batch file naming for better organization
+- **App Rebranding**: Updated to "Label-IT - Asset Label Generator" with left-aligned branding

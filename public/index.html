@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Asset Label Generator</title>
+        <title>Label-IT - Asset Label Generator</title>
         <style>
             :root {
                 --bg-color: #f8f9fa;
@@ -33,18 +33,21 @@
                 padding: 20px;
             }
             .header {
-                text-align: center;
-                margin-bottom: 30px;
+                text-align: left;
+                margin-bottom: 20px;
+                padding: 20px 0 10px 0;
             }
             .header h1 {
                 color: var(--text-color);
-                margin: 0 0 10px 0;
+                margin: 0;
                 font-weight: 600;
+                font-size: 32px;
             }
             .header p {
                 color: #6c757d;
-                margin: 0;
-                font-size: 16px;
+                margin: 5px 0 0 0;
+                font-size: 14px;
+                display: none;
             }
 
             /* Batch Print Bar */
@@ -116,71 +119,68 @@
                 font-size: 14px;
             }
 
-            /* Collapsible Controls */
-            .controls-wrapper {
+            /* Search Section */
+            .search-section {
                 background-color: var(--surface-color);
                 border-radius: 12px;
                 box-shadow: 0 2px 10px var(--shadow-color);
-                margin-bottom: 30px;
+                margin-bottom: 20px;
                 border: 1px solid var(--border-color);
-                overflow: hidden;
-            }
-            .controls-header {
-                padding: 15px 20px;
-                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-                border-bottom: 1px solid var(--border-color);
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                transition: background 0.2s ease;
-            }
-            .controls-header:hover {
-                background: linear-gradient(135deg, #e9ecef, #dee2e6);
-            }
-            .controls-title {
-                font-weight: 600;
-                font-size: 16px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            .toggle-icon {
-                font-size: 14px;
-                transition: transform 0.3s ease;
-                color: var(--secondary-color);
-            }
-            .controls-wrapper.collapsed .toggle-icon {
-                transform: rotate(-90deg);
-            }
-            .controls {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 20px;
                 padding: 20px;
-                transition: all 0.3s ease;
-                max-height: 200px;
-                overflow: hidden;
-            }
-            .controls-wrapper.collapsed .controls {
-                max-height: 0;
-                padding: 0 20px;
-                opacity: 0;
             }
 
-            .search-container {
-                flex-grow: 1;
+            .search-controls {
+                display: flex;
+                gap: 15px;
+                align-items: flex-end;
+                flex-wrap: wrap;
+            }
+
+            .search-input-group {
+                flex: 1;
                 min-width: 250px;
             }
-            .search-container label {
+
+            /* Stats Section */
+            .stats-section {
+                background-color: var(--surface-color);
+                border-radius: 12px;
+                box-shadow: 0 2px 10px var(--shadow-color);
+                margin-bottom: 20px;
+                border: 1px solid var(--border-color);
+                padding: 15px;
+            }
+
+            /* Selection Controls - Hidden by default */
+            .selection-section {
+                background-color: var(--surface-color);
+                border-radius: 12px;
+                box-shadow: 0 2px 10px var(--shadow-color);
+                margin-bottom: 20px;
+                border: 1px solid var(--border-color);
+                padding: 15px 20px;
+                display: none;
+            }
+
+            .selection-section.visible {
+                display: block;
+            }
+            .selection-controls {
+                display: flex;
+                gap: 10px;
+                flex-wrap: wrap;
+            }
+
+            .search-input-group label {
                 display: block;
                 font-weight: 500;
-                margin-bottom: 5px;
+                margin-bottom: 8px;
                 color: var(--text-color);
+                font-size: 16px;
             }
             #search {
                 width: 100%;
-                padding: 12px 16px;
+                padding: 14px 16px;
                 font-size: 16px;
                 border: 2px solid var(--border-color);
                 border-radius: 8px;
@@ -223,11 +223,18 @@
                 align-items: center;
                 font-size: 14px;
                 color: #6c757d;
+                flex-wrap: wrap;
+                margin-top: 8px;
+                margin-bottom: 18px;
             }
             .stat-item {
                 display: flex;
                 align-items: center;
-                gap: 5px;
+                gap: 8px;
+                background: var(--bg-color);
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-weight: 500;
             }
             .group-header {
                 margin: 30px 0 15px 0;
@@ -264,7 +271,7 @@
             }
             .asset-card:hover {
                 box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-                transform: translateY(-2px);
+                /*transform: translateY(-2px);*/
             }
             .asset-card.selected {
                 border-color: var(--primary-color);
@@ -339,18 +346,14 @@
             .asset-tag {
                 font-size: 13px;
                 font-weight: 600;
-                background: linear-gradient(
-                    135deg,
-                    var(--primary-color) 0%,
-                    #0056b3 100%
-                );
+                background: var(--primary-color);
                 color: white;
-                padding: 6px 12px;
-                border-radius: 20px;
+                padding: 4px 8px;
+                border-radius: 4px;
                 flex-shrink: 0;
                 font-family: 'Courier New', monospace;
-                letter-spacing: 0.5px;
-                box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+                letter-spacing: 0.3px;
+                border: 1px solid rgba(0, 0, 0, 0.1);
             }
             .asset-details {
                 font-size: 14px;
@@ -496,68 +499,136 @@
             }
 
             /* Select All Controls */
-            .select-controls {
-                display: flex;
-                gap: 10px;
-                align-items: center;
-                margin-bottom: 20px;
-                padding: 15px;
-                background-color: var(--surface-color);
-                border-radius: 8px;
-                border: 1px solid var(--border-color);
-            }
             .select-btn {
                 background: var(--bg-color);
                 border: 1px solid var(--border-color);
-                padding: 6px 12px;
-                border-radius: 4px;
+                padding: 8px 16px;
+                border-radius: 6px;
                 cursor: pointer;
                 font-size: 14px;
                 transition: all 0.2s ease;
+                white-space: nowrap;
             }
             .select-btn:hover {
                 background: var(--border-color);
             }
 
+            /* Hide grouping on mobile */
+            .mobile-hidden {
+                display: flex;
+            }
+
             @media (max-width: 768px) {
                 .container {
+                    padding: 10px;
+                }
+                .header h1 {
+                    font-size: 24px;
+                }
+                .header p {
+                    display: block;
+                }
+                .search-section {
+                    margin-bottom: 15px;
                     padding: 15px;
                 }
-                .controls {
+                .search-controls {
                     flex-direction: column;
-                    padding: 15px;
+                    gap: 12px;
+                    align-items: stretch;
                 }
-                .search-container {
+                .search-input-group {
                     min-width: auto;
                 }
-                .control-group {
-                    min-width: auto;
+                .mobile-hidden {
+                    display: none;
+                }
+                .stats-section {
+                    margin-bottom: 15px;
+                    padding: 12px;
                 }
                 .stats {
+                    justify-content: space-between;
+                    gap: 10px;
+                }
+                .stat-item {
+                    flex: 1;
                     justify-content: center;
-                    flex-wrap: wrap;
+                    font-size: 12px;
+                    padding: 6px 8px;
+                }
+                .stat-item span:first-child {
+                    font-size: 14px;
+                }
+                .selection-controls {
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                .select-btn {
+                    width: 100%;
+                    padding: 12px;
+                    text-align: center;
                 }
                 #asset-grid {
                     grid-template-columns: 1fr;
                     gap: 15px;
                 }
+                .asset-card {
+                    margin: 0;
+                }
+                .asset-content {
+                    padding: 15px;
+                }
                 .asset-header {
-                    flex-direction: column;
-                    align-items: flex-start;
+                    flex-direction: row;
+                    align-items: center;
                     gap: 10px;
                 }
+                .asset-header h3 {
+                    font-size: 16px;
+                    flex: 1;
+                }
                 .asset-tag {
-                    align-self: flex-end;
+                    font-size: 12px;
+                    padding: 4px 8px;
+                }
+                .asset-details {
+                    font-size: 13px;
+                    margin-bottom: 15px;
+                }
+                .previews-container {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 10px;
+                }
+                .preview-box {
+                    height: 70px;
+                }
+                .preview-item p {
+                    font-size: 11px;
+                }
+                .batch-print-bar {
+                    padding: 10px;
                 }
                 .batch-controls {
                     flex-direction: column;
-                    align-items: flex-start;
+                    align-items: stretch;
                     gap: 10px;
+                }
+                .batch-info {
+                    text-align: center;
+                    font-size: 14px;
                 }
                 .batch-actions {
                     margin-left: 0;
                     width: 100%;
-                    justify-content: flex-end;
+                    justify-content: stretch;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                .template-selector,
+                .batch-btn {
+                    width: 100%;
+                    text-align: center;
                 }
             }
         </style>
@@ -565,23 +636,13 @@
     <body>
         <div class="container">
             <div class="header">
-                <h1>Asset Label Generator</h1>
-                <p>
-                    Professional label generation system with Snipe-IT
-                    integration
-                </p>
+                <h1>Label-IT</h1>
+                <p>Asset Label Generator</p>
             </div>
 
-            <div class="controls-wrapper" id="controls-wrapper">
-                <div class="controls-header" onclick="toggleControls()">
-                    <div class="controls-title">
-                        <span>🎛️</span>
-                        <span>Search & Filters</span>
-                    </div>
-                    <div class="toggle-icon">▼</div>
-                </div>
-                <div class="controls">
-                    <div class="search-container">
+            <div class="search-section">
+                <div class="search-controls">
+                    <div class="search-input-group">
                         <label for="search">Search Assets</label>
                         <input
                             type="text"
@@ -589,7 +650,7 @@
                             placeholder="Search by name, tag, or serial number..."
                         />
                     </div>
-                    <div class="control-group">
+                    <div class="control-group mobile-hidden">
                         <label for="group-by">Group By</label>
                         <select id="group-by">
                             <option value="none">No Grouping</option>
@@ -607,33 +668,36 @@
                             <option value="name-desc">Name (Z-A)</option>
                         </select>
                     </div>
-                    <div class="stats">
-                        <div class="stat-item">
-                            <span>📊</span>
-                            <span id="asset-count">0 assets</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>👁️</span>
-                            <span id="visible-count">0 visible</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>✅</span>
-                            <span id="selected-count">0 selected</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
-            <div class="select-controls">
-                <button class="select-btn" onclick="selectAll()">
-                    Select All Visible
-                </button>
-                <button class="select-btn" onclick="selectNone()">
-                    Clear Selection
-                </button>
-                <button class="select-btn" onclick="selectInvert()">
-                    Invert Selection
-                </button>
+            <div class="selection-section" id="selection-section">
+                <div class="selection-controls">
+                    <button class="select-btn" onclick="selectNone()">
+                        Clear Selection
+                    </button>
+                    <button class="select-btn" onclick="selectInvert()">
+                        Invert Selection
+                    </button>
+                    <button class="select-btn" onclick="selectAll()">
+                        Select All Visible
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-item">
+                    <span>📊</span>
+                    <span id="asset-count">0 assets</span>
+                </div>
+                <div class="stat-item">
+                    <span>👁️</span>
+                    <span id="visible-count">0 visible</span>
+                </div>
+                <div class="stat-item">
+                    <span>✅</span>
+                    <span id="selected-count">0 selected</span>
+                </div>
             </div>
 
             <div id="asset-container">
@@ -728,9 +792,14 @@
                 },
             ]
 
-            function toggleControls() {
-                const wrapper = document.getElementById('controls-wrapper')
-                wrapper.classList.toggle('collapsed')
+            function updateSelectionVisibility() {
+                const selectionSection =
+                    document.getElementById('selection-section')
+                if (selectedAssets.size > 0) {
+                    selectionSection.classList.add('visible')
+                } else {
+                    selectionSection.classList.remove('visible')
+                }
             }
 
             function generateCardHtml(asset) {
@@ -960,6 +1029,7 @@
 
                 updateSelectedCount()
                 updateBatchBar()
+                updateSelectionVisibility()
             }
 
             function updateSelectedCount() {
@@ -973,6 +1043,7 @@
                 } else {
                     batchPrintBar.classList.remove('visible')
                 }
+                updateSelectionVisibility()
             }
 
             function selectAll() {

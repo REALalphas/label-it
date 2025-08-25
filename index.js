@@ -387,9 +387,13 @@ app.post('/generate-batch', async (request, reply) => {
 
         const mergedPdf = await mergedPdfDoc.save()
 
+        const timestamp = new Date()
+            .toISOString()
+            .replace(/[:.]/g, '-')
+            .slice(0, -5)
         reply.header(
             'Content-Disposition',
-            `attachment; filename="batch-labels-${template_type}-${Date.now()}.pdf"`,
+            `attachment; filename="batch-${template_type}-${assetIdArray.length}assets-${timestamp}.pdf"`,
         )
         reply.type('application/pdf').send(mergedPdf)
 
@@ -656,9 +660,17 @@ app.post('/generate', async (request, reply) => {
                 printBackground: true,
             })
 
+            const assetTag = assetData.asset_tag.replace(/[^a-zA-Z0-9]/g, '-')
+            const assetName = (
+                assetData.name ||
+                assetData.model.name ||
+                'asset'
+            )
+                .replace(/[^a-zA-Z0-9]/g, '-')
+                .substring(0, 30)
             reply.header(
                 'Content-Disposition',
-                `attachment; filename="label-${template_type}-${asset_id}.pdf"`,
+                `attachment; filename="label-${template_type}-${assetTag}-${assetName}.pdf"`,
             )
             reply.type('application/pdf').send(pdfBuffer)
         }
