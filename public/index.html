@@ -16,6 +16,7 @@
                 --success-color: #28a745;
                 --warning-color: #ffc107;
                 --danger-color: #dc3545;
+                --secondary-color: #6c757d;
             }
             body {
                 font-family:
@@ -45,17 +46,128 @@
                 margin: 0;
                 font-size: 16px;
             }
-            .controls {
+
+            /* Batch Print Bar */
+            .batch-print-bar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(
+                    135deg,
+                    var(--primary-color),
+                    #0056b3
+                );
+                color: white;
+                padding: 15px 20px;
+                transform: translateY(100%);
+                transition: transform 0.3s ease;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+                z-index: 1000;
+            }
+            .batch-print-bar.visible {
+                transform: translateY(0);
+            }
+            .batch-controls {
+                max-width: 1400px;
+                margin: 0 auto;
                 display: flex;
-                flex-wrap: wrap;
+                align-items: center;
                 gap: 20px;
-                padding: 20px;
+                flex-wrap: wrap;
+            }
+            .batch-info {
+                font-weight: 600;
+            }
+            .batch-actions {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                margin-left: auto;
+            }
+            .batch-btn {
+                background: rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s ease;
+            }
+            .batch-btn:hover {
+                background: rgba(255, 255, 255, 0.3);
+                transform: translateY(-1px);
+            }
+            .batch-btn.primary {
+                background: rgba(255, 255, 255, 0.9);
+                color: var(--primary-color);
+                font-weight: 600;
+            }
+            .batch-btn.primary:hover {
+                background: white;
+            }
+            .template-selector {
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+
+            /* Collapsible Controls */
+            .controls-wrapper {
                 background-color: var(--surface-color);
                 border-radius: 12px;
                 box-shadow: 0 2px 10px var(--shadow-color);
                 margin-bottom: 30px;
                 border: 1px solid var(--border-color);
+                overflow: hidden;
             }
+            .controls-header {
+                padding: 15px 20px;
+                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+                border-bottom: 1px solid var(--border-color);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                transition: background 0.2s ease;
+            }
+            .controls-header:hover {
+                background: linear-gradient(135deg, #e9ecef, #dee2e6);
+            }
+            .controls-title {
+                font-weight: 600;
+                font-size: 16px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .toggle-icon {
+                font-size: 14px;
+                transition: transform 0.3s ease;
+                color: var(--secondary-color);
+            }
+            .controls-wrapper.collapsed .toggle-icon {
+                transform: rotate(-90deg);
+            }
+            .controls {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                padding: 20px;
+                transition: all 0.3s ease;
+                max-height: 200px;
+                overflow: hidden;
+            }
+            .controls-wrapper.collapsed .controls {
+                max-height: 0;
+                padding: 0 20px;
+                opacity: 0;
+            }
+
             .search-container {
                 flex-grow: 1;
                 min-width: 250px;
@@ -154,9 +266,31 @@
                 box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
                 transform: translateY(-2px);
             }
+            .asset-card.selected {
+                border-color: var(--primary-color);
+                box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            }
             .asset-card.deleted {
                 opacity: 0.6;
                 background-color: #f8f9fa;
+            }
+            .asset-selector {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                z-index: 10;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+            }
+            .asset-card:hover .asset-selector,
+            .asset-card.selected .asset-selector {
+                opacity: 1;
+            }
+            .asset-selector input[type='checkbox'] {
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+                border-radius: 4px;
             }
             .asset-image {
                 width: 100%;
@@ -360,6 +494,31 @@
                 text-align: center;
                 margin: 20px 0;
             }
+
+            /* Select All Controls */
+            .select-controls {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                margin-bottom: 20px;
+                padding: 15px;
+                background-color: var(--surface-color);
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+            }
+            .select-btn {
+                background: var(--bg-color);
+                border: 1px solid var(--border-color);
+                padding: 6px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s ease;
+            }
+            .select-btn:hover {
+                background: var(--border-color);
+            }
+
             @media (max-width: 768px) {
                 .container {
                     padding: 15px;
@@ -390,6 +549,16 @@
                 .asset-tag {
                     align-self: flex-end;
                 }
+                .batch-controls {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 10px;
+                }
+                .batch-actions {
+                    margin-left: 0;
+                    width: 100%;
+                    justify-content: flex-end;
+                }
             }
         </style>
     </head>
@@ -403,49 +572,98 @@
                 </p>
             </div>
 
-            <div class="controls">
-                <div class="search-container">
-                    <label for="search">Search Assets</label>
-                    <input
-                        type="text"
-                        id="search"
-                        placeholder="Search by name, tag, or serial number..."
-                    />
-                </div>
-                <div class="control-group">
-                    <label for="group-by">Group By</label>
-                    <select id="group-by">
-                        <option value="none">No Grouping</option>
-                        <option value="category">Category</option>
-                        <option value="model">Model</option>
-                        <option value="status_label">Status</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label for="sort-by">Sort By</label>
-                    <select id="sort-by">
-                        <option value="id-desc">Newest First</option>
-                        <option value="id-asc">Oldest First</option>
-                        <option value="name-asc">Name (A-Z)</option>
-                        <option value="name-desc">Name (Z-A)</option>
-                    </select>
-                </div>
-                <div class="stats">
-                    <div class="stat-item">
-                        <span>📊</span>
-                        <span id="asset-count">0 assets</span>
+            <div class="controls-wrapper" id="controls-wrapper">
+                <div class="controls-header" onclick="toggleControls()">
+                    <div class="controls-title">
+                        <span>🎛️</span>
+                        <span>Search & Filters</span>
                     </div>
-                    <div class="stat-item">
-                        <span>👁️</span>
-                        <span id="visible-count">0 visible</span>
+                    <div class="toggle-icon">▼</div>
+                </div>
+                <div class="controls">
+                    <div class="search-container">
+                        <label for="search">Search Assets</label>
+                        <input
+                            type="text"
+                            id="search"
+                            placeholder="Search by name, tag, or serial number..."
+                        />
+                    </div>
+                    <div class="control-group">
+                        <label for="group-by">Group By</label>
+                        <select id="group-by">
+                            <option value="none">No Grouping</option>
+                            <option value="category">Category</option>
+                            <option value="model">Model</option>
+                            <option value="status_label">Status</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label for="sort-by">Sort By</label>
+                        <select id="sort-by">
+                            <option value="id-desc">Newest First</option>
+                            <option value="id-asc">Oldest First</option>
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="name-desc">Name (Z-A)</option>
+                        </select>
+                    </div>
+                    <div class="stats">
+                        <div class="stat-item">
+                            <span>📊</span>
+                            <span id="asset-count">0 assets</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>👁️</span>
+                            <span id="visible-count">0 visible</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>✅</span>
+                            <span id="selected-count">0 selected</span>
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="select-controls">
+                <button class="select-btn" onclick="selectAll()">
+                    Select All Visible
+                </button>
+                <button class="select-btn" onclick="selectNone()">
+                    Clear Selection
+                </button>
+                <button class="select-btn" onclick="selectInvert()">
+                    Invert Selection
+                </button>
             </div>
 
             <div id="asset-container">
                 <div class="loader">
                     <div class="spinner"></div>
                     <div>Loading assets...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Batch Print Bar -->
+        <div class="batch-print-bar" id="batch-print-bar">
+            <div class="batch-controls">
+                <div class="batch-info">
+                    <span id="batch-count">0</span> assets selected for batch
+                    printing
+                </div>
+                <div class="batch-actions">
+                    <select class="template-selector" id="batch-template">
+                        <option value="default">Standard (50×25mm)</option>
+                        <option value="medium">Medium (40×30mm)</option>
+                        <option value="datamatrix">DataMatrix (15×15mm)</option>
+                        <option value="cable_flag">Cable Flag (12×40mm)</option>
+                    </select>
+                    <button class="batch-btn primary" onclick="batchPrint()">
+                        📄 Generate Batch PDF
+                    </button>
+                    <button class="batch-btn" onclick="clearBatch()">
+                        ✕ Clear
+                    </button>
                 </div>
             </div>
         </div>
@@ -461,15 +679,38 @@
             <input type="hidden" name="template_type" id="form-template-type" />
         </form>
 
+        <!-- Batch form for multiple assets -->
+        <form
+            id="batch-form"
+            action="/generate-batch"
+            method="POST"
+            target="_blank"
+            style="display: none"
+        >
+            <input type="hidden" name="asset_ids" id="batch-asset-ids" />
+            <input
+                type="hidden"
+                name="template_type"
+                id="batch-template-type"
+            />
+        </form>
+
         <script>
             let allAssets = []
+            let filteredAssets = []
+            let visibleAssets = []
+            let selectedAssets = new Set()
             const container = document.getElementById('asset-container')
             const searchInput = document.getElementById('search')
             const groupBySelect = document.getElementById('group-by')
             const sortBySelect = document.getElementById('sort-by')
             const assetCountEl = document.getElementById('asset-count')
             const visibleCountEl = document.getElementById('visible-count')
+            const selectedCountEl = document.getElementById('selected-count')
+            const batchPrintBar = document.getElementById('batch-print-bar')
+            const batchCountEl = document.getElementById('batch-count')
             let previewCache = {}
+            let intersectionObserver = null
 
             // Available label types with professional descriptions
             const LABEL_TYPES = [
@@ -487,18 +728,25 @@
                 },
             ]
 
+            function toggleControls() {
+                const wrapper = document.getElementById('controls-wrapper')
+                wrapper.classList.toggle('collapsed')
+            }
+
             function generateCardHtml(asset) {
                 const displayName =
                     asset.name || asset.model.name || 'Unnamed Asset'
                 const imageUrl = asset.image ? `url(${asset.image})` : 'none'
                 const statusClass = asset.deleted_at ? 'deleted' : ''
+                const isSelected = selectedAssets.has(asset.id)
 
                 // Generate preview HTML for all label types
                 const previewsHtml = LABEL_TYPES.map(
                     (label) => `
                 <div class="preview-item">
                     <div class="preview-box"
-                         id="preview-${asset.id}-${label.id}"
+                         data-asset-id="${asset.id}"
+                         data-template-type="${label.id}"
                          onclick="generateLabel(${asset.id}, '${label.id}')"
                          title="Generate ${label.name} label (${label.description})">
                         <div class="loading">●●●</div>
@@ -509,7 +757,10 @@
                 ).join('')
 
                 return `
-            <div class="asset-card ${statusClass}">
+            <div class="asset-card ${statusClass} ${isSelected ? 'selected' : ''}" data-asset-id="${asset.id}">
+                <div class="asset-selector">
+                    <input type="checkbox" onchange="toggleAssetSelection(${asset.id})" ${isSelected ? 'checked' : ''}>
+                </div>
                 <div class="asset-image" style="background-image: ${imageUrl}"></div>
                 <div class="asset-content">
                     <div class="asset-header">
@@ -570,9 +821,13 @@
                     }
                 })
 
+                filteredAssets = assetsToRender
+                visibleAssets = assetsToRender
+
                 // Update statistics
                 assetCountEl.textContent = `${allAssets.filter((a) => !a.deleted_at).length} assets`
                 visibleCountEl.textContent = `${assetsToRender.length} visible`
+                updateSelectedCount()
 
                 if (assetsToRender.length === 0) {
                     container.innerHTML = `
@@ -604,18 +859,48 @@
                 }
 
                 container.innerHTML = html
+                setupIntersectionObserver()
+            }
 
-                // Load previews for visible assets
-                assetsToRender.forEach((asset) => {
-                    LABEL_TYPES.forEach((label) => {
-                        showPreview(asset.id, label.id)
+            function setupIntersectionObserver() {
+                if (intersectionObserver) {
+                    intersectionObserver.disconnect()
+                }
+
+                intersectionObserver = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                const previewBox = entry.target
+                                const assetId = previewBox.dataset.assetId
+                                const templateType =
+                                    previewBox.dataset.templateType
+
+                                if (assetId && templateType) {
+                                    showPreview(assetId, templateType)
+                                    intersectionObserver.unobserve(previewBox)
+                                }
+                            }
+                        })
+                    },
+                    {
+                        root: null,
+                        rootMargin: '100px',
+                        threshold: 0.1,
+                    },
+                )
+
+                // Observe all preview boxes
+                document
+                    .querySelectorAll('.preview-box[data-asset-id]')
+                    .forEach((box) => {
+                        intersectionObserver.observe(box)
                     })
-                })
             }
 
             async function showPreview(assetId, templateType) {
-                const previewDiv = document.getElementById(
-                    `preview-${assetId}-${templateType}`,
+                const previewDiv = document.querySelector(
+                    `.preview-box[data-asset-id="${assetId}"][data-template-type="${templateType}"]`,
                 )
                 if (!previewDiv) return
 
@@ -652,6 +937,95 @@
                     )
                     previewDiv.innerHTML = '<span class="error">✕</span>'
                 }
+            }
+
+            function toggleAssetSelection(assetId) {
+                if (selectedAssets.has(assetId)) {
+                    selectedAssets.delete(assetId)
+                } else {
+                    selectedAssets.add(assetId)
+                }
+
+                // Update visual state
+                const card = document.querySelector(
+                    `.asset-card[data-asset-id="${assetId}"]`,
+                )
+                if (card) {
+                    if (selectedAssets.has(assetId)) {
+                        card.classList.add('selected')
+                    } else {
+                        card.classList.remove('selected')
+                    }
+                }
+
+                updateSelectedCount()
+                updateBatchBar()
+            }
+
+            function updateSelectedCount() {
+                selectedCountEl.textContent = `${selectedAssets.size} selected`
+            }
+
+            function updateBatchBar() {
+                batchCountEl.textContent = selectedAssets.size
+                if (selectedAssets.size > 0) {
+                    batchPrintBar.classList.add('visible')
+                } else {
+                    batchPrintBar.classList.remove('visible')
+                }
+            }
+
+            function selectAll() {
+                visibleAssets.forEach((asset) => {
+                    if (!asset.deleted_at) {
+                        selectedAssets.add(asset.id)
+                    }
+                })
+                renderAssets()
+                updateSelectedCount()
+                updateBatchBar()
+            }
+
+            function selectNone() {
+                selectedAssets.clear()
+                renderAssets()
+                updateSelectedCount()
+                updateBatchBar()
+            }
+
+            function selectInvert() {
+                visibleAssets.forEach((asset) => {
+                    if (!asset.deleted_at) {
+                        if (selectedAssets.has(asset.id)) {
+                            selectedAssets.delete(asset.id)
+                        } else {
+                            selectedAssets.add(asset.id)
+                        }
+                    }
+                })
+                renderAssets()
+                updateSelectedCount()
+                updateBatchBar()
+            }
+
+            function clearBatch() {
+                selectNone()
+            }
+
+            function batchPrint() {
+                if (selectedAssets.size === 0) {
+                    alert('Please select at least one asset for batch printing')
+                    return
+                }
+
+                const templateType =
+                    document.getElementById('batch-template').value
+                const assetIds = Array.from(selectedAssets).join(',')
+
+                document.getElementById('batch-asset-ids').value = assetIds
+                document.getElementById('batch-template-type').value =
+                    templateType
+                document.getElementById('batch-form').submit()
             }
 
             function getGroupKey(asset, groupBy) {

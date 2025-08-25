@@ -5,11 +5,13 @@ A professional asset label generation system with Snipe-IT integration. Generate
 ## Features
 
 - **Multiple Label Formats**: Standard (50×25mm), Medium (40×30mm), DataMatrix (15×15mm), and Cable Flag (12×40mm)
+- **Batch Label Generation**: Select multiple assets and generate combined PDF documents for efficient printing
 - **Snipe-IT Integration**: Direct integration with your Snipe-IT instance for seamless asset data retrieval
-- **Real-time Previews**: Generate PNG previews of labels before printing
+- **Real-time Previews**: Generate PNG previews of labels before printing with lazy loading optimization
 - **Professional PDF Output**: High-quality PDF generation optimized for label printing
 - **Advanced Search**: Search assets by name, tag, serial number, or category
 - **Flexible Grouping**: Group assets by category, model, or status
+- **Asset Selection**: Multi-select functionality with batch operations
 - **Responsive Design**: Works perfectly on desktop and mobile devices
 - **Custom Field Support**: Automatically includes relevant custom fields in labels
 
@@ -123,7 +125,7 @@ Retrieves all assets from Snipe-IT.
 **Response:** Array of asset objects
 
 ### `POST /generate`
-Generates a label in PDF or PNG format.
+Generates a single label in PDF or PNG format.
 
 **Parameters:**
 - `asset_id` (required): Asset ID from Snipe-IT
@@ -132,6 +134,36 @@ Generates a label in PDF or PNG format.
 **Headers:**
 - `Accept: application/pdf` - Returns PDF (default)
 - `Accept: image/png` - Returns PNG preview
+
+### `POST /generate-batch`
+Generates multiple labels in a single PDF document.
+
+**Parameters:**
+- `asset_ids` (required): Comma-separated list of asset IDs from Snipe-IT
+- `template_type` (required): Label type for all assets (`default`, `medium`, `datamatrix`, `cable_flag`)
+
+**Response:** Combined PDF document with all generated labels
+
+## Usage
+
+### Web Interface
+
+1. **Search and Filter**: Use the collapsible search panel to find specific assets
+2. **Asset Selection**:
+   - Hover over asset cards to see selection checkboxes
+   - Use bulk selection buttons: "Select All Visible", "Clear Selection", "Invert Selection"
+3. **Individual Labels**: Click on any preview thumbnail to generate a single PDF label
+4. **Batch Printing**:
+   - Select multiple assets using checkboxes
+   - Choose template type from the batch print bar at the bottom
+   - Click "Generate Batch PDF" to create a combined document
+5. **Preview System**: Label previews are generated automatically when assets are visible on screen
+
+### Keyboard Shortcuts
+
+- **Ctrl/Cmd + A**: Select all visible assets
+- **Escape**: Clear selection
+- **Enter** (on search): Focus first result
 
 ## Development
 
@@ -144,20 +176,27 @@ npm run dev
 ```
 label-it/
 ├── public/
-│   └── index.html          # Main application interface
+│   └── index.html          # Main application interface with batch functionality
 ├── template*.html          # Label templates
-├── index.js               # Main server application
-├── package.json           # Project configuration
-├── .env.example          # Environment configuration template
-└── README.md             # This file
+├── index.js                # Main server application with batch endpoints
+├── package.json            # Project configuration
+├── .env.example            # Environment configuration template
+└── README.md               # This file
 ```
 
 ### Adding New Label Types
 
 1. Create a new HTML template file (e.g., `template_custom.html`)
-2. Add the template case to the switch statement in `index.js`
+2. Add the template case to both `/generate` and `/generate-batch` endpoints in `index.js`
 3. Update the `LABEL_TYPES` array in `index.html`
 4. Set appropriate page dimensions in the template
+
+### Performance Considerations
+
+- **Preview Loading**: Only visible previews are generated using Intersection Observer API
+- **Batch Processing**: Large batch operations are processed sequentially to prevent memory issues
+- **PDF Merging**: Uses pdf-lib for efficient PDF document combining
+- **Memory Management**: Browser instances are properly closed after each operation
 
 ## Troubleshooting
 
@@ -206,3 +245,10 @@ For support and questions:
 - Professional web interface
 - Environment-based configuration
 - Real-time preview generation
+
+### Version 0.2
+- Batch label generation with PDF merging
+- Optimized preview loading with intersection observer
+- Collapsible interface controls
+- Multi-asset selection system
+- Responsive design with mobile support

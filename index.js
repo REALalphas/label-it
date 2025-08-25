@@ -4,6 +4,7 @@ const puppeteer = require('puppeteer')
 const axios = require('axios')
 const fs = require('fs/promises')
 const bwipjs = require('bwip-js')
+const { PDFDocument } = require('pdf-lib')
 
 // Load environment variables
 require('dotenv').config()
@@ -98,6 +99,326 @@ app.get('/assets', async (request, reply) => {
             error: 'Failed to fetch assets from Snipe-IT',
             details: error.response?.data?.message || error.message,
         })
+    }
+})
+
+// Generate batch PDF with multiple labels
+app.post('/generate-batch', async (request, reply) => {
+    const { asset_ids, template_type } = request.body
+
+    if (!asset_ids || !template_type) {
+        return reply.status(400).send({
+            error: 'Missing required parameters: asset_ids and template_type',
+        })
+    }
+
+    const assetIdArray = asset_ids
+        .split(',')
+        .map((id) => parseInt(id.trim()))
+        .filter((id) => !isNaN(id))
+
+    if (assetIdArray.length === 0) {
+        return reply.status(400).send({
+            error: 'No valid asset IDs provided',
+        })
+    }
+
+    app.log.info(
+        {
+            asset_ids: assetIdArray,
+            template_type,
+            count: assetIdArray.length,
+        },
+        'Generating batch labels',
+    )
+
+    let browser
+    try {
+        browser = await puppeteer.launch({
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            headless: 'new',
+        })
+
+        const pdfPages = []
+
+        for (const assetId of assetIdArray) {
+            try {
+                // Fetch asset data from Snipe-IT
+                const response = await axios.get(
+                    `${config.snipeItUrl}/api/v1/hardware/${assetId}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${config.snipeItToken}`,
+                            Accept: 'application/json',
+                        },
+                    },
+                )
+                const assetData = response.data
+
+                let htmlContent
+                let pageOptions = {}
+
+                // Load and process template based on type (same logic as single generate)
+                switch (template_type) {
+                    case 'datamatrix':
+                        htmlContent = await fs.readFile(
+                            path.join(__dirname, 'template_datamatrix.html'),
+                            'utf-8',
+                        )
+                        const pngBuffer = await bwipjs.toBuffer({
+                            bcid: 'datamatrix',
+                            text: assetData.asset_tag,
+                            scale: 5,
+                        })
+                        htmlContent = htmlContent.replace(
+                            '{{datamatrix_image}}',
+                            `data:image/png;base64,${pngBuffer.toString('base64')}`,
+                        )
+                        pageOptions = { width: 15, height: 15, unit: 'mm' }
+                        break
+
+                    case 'cable_flag':
+                        htmlContent = await fs.readFile(
+                            path.join(__dirname, 'template_cable_flag.html'),
+                            'utf-8',
+                        )
+                        pageOptions = { width: 12, height: 40, unit: 'mm' }
+                        break
+
+                    case 'medium':
+                        htmlContent = await fs.readFile(
+                            path.join(__dirname, 'template_medium.html'),
+                            'utf-8',
+                        )
+                        pageOptions = { width: 40, height: 30, unit: 'mm' }
+
+                        const assetUrlMed = `${config.snipeItUrl}/hardware/${assetData.id}`
+                        const qrPngBufferMed = await bwipjs.toBuffer({
+                            bcid: 'qrcode',
+                            text: assetUrlMed,
+                            scale: 3,
+                        })
+                        htmlContent = htmlContent.replace(
+                            '{{qr_code_image}}',
+                            `data:image/png;base64,${qrPngBufferMed.toString('base64')}`,
+                        )
+
+                        const barcodePngBufferMed = await bwipjs.toBuffer({
+                            bcid: 'code128',
+                            text: assetData.id.toString(),
+                            scale: 3,
+                            height: 4,
+                            includetext: false,
+                        })
+                        htmlContent = htmlContent.replace(
+                            '{{barcode_image}}',
+                            `data:image/png;base64,${barcodePngBufferMed.toString('base64')}`,
+                        )
+                        break
+
+                    default:
+                        htmlContent = await fs.readFile(
+                            path.join(__dirname, 'template.html'),
+                            'utf-8',
+                        )
+                        pageOptions = { width: 50, height: 25, unit: 'mm' }
+
+                        const assetUrl = `${config.snipeItUrl}/hardware/${assetData.id}`
+                        const qrPngBuffer = await bwipjs.toBuffer({
+                            bcid: 'qrcode',
+                            text: assetUrl,
+                            scale: 3,
+                        })
+                        htmlContent = htmlContent.replace(
+                            '{{qr_code_image}}',
+                            `data:image/png;base64,${qrPngBuffer.toString('base64')}`,
+                        )
+
+                        const barcodePngBuffer = await bwipjs.toBuffer({
+                            bcid: 'code128',
+                            text: assetData.id.toString(),
+                            scale: 3,
+                            height: 4,
+                            includetext: false,
+                        })
+                        htmlContent = htmlContent.replace(
+                            '{{barcode_image}}',
+                            `data:image/png;base64,${barcodePngBuffer.toString('base64')}`,
+                        )
+                        break
+                }
+
+                // Replace template variables with asset data (same as single generate)
+                htmlContent = htmlContent.replace(
+                    /{{company_name}}/g,
+                    config.companyName,
+                )
+                htmlContent = htmlContent.replace(
+                    /{{asset_tag}}/g,
+                    assetData.asset_tag,
+                )
+                htmlContent = htmlContent.replace(
+                    /{{asset_name}}/g,
+                    assetData.name || assetData.model.name,
+                )
+                htmlContent = htmlContent.replace(
+                    /{{first_line}}/g,
+                    assetData.category.name,
+                )
+                htmlContent = htmlContent.replace(
+                    /{{second_line}}/g,
+                    assetData.name ? assetData.name : assetData.model.name,
+                )
+
+                // Build third line from custom fields
+                let thirdLine = ''
+                const fields = assetData.custom_fields
+
+                if (
+                    fields[config.customFieldMapping.connector]?.value &&
+                    fields[config.customFieldMapping.connector_2]?.value
+                ) {
+                    thirdLine +=
+                        fields[config.customFieldMapping.connector].value +
+                        ' | ' +
+                        fields[config.customFieldMapping.connector_2].value +
+                        ' '
+                }
+
+                if (fields[config.customFieldMapping.storage_size]?.value) {
+                    thirdLine +=
+                        fields[config.customFieldMapping.storage_size].value +
+                        ' '
+                }
+
+                if (
+                    fields[config.customFieldMapping.battery_chemistry]?.value
+                ) {
+                    thirdLine +=
+                        fields[config.customFieldMapping.battery_chemistry]
+                            .value + ' '
+                }
+                if (fields[config.customFieldMapping.battery_size]?.value) {
+                    thirdLine +=
+                        fields[config.customFieldMapping.battery_size].value +
+                        ' '
+                }
+
+                htmlContent = htmlContent.replace(
+                    /{{third_line}}/g,
+                    thirdLine || '—',
+                )
+
+                // Build fourth line
+                let fourthLine = ''
+                if (assetData.serial) {
+                    fourthLine += 'S/N: ' + assetData.serial + ' '
+                }
+
+                const dataTransferField =
+                    fields[config.customFieldMapping.data_transfer]
+                if (dataTransferField) {
+                    if (dataTransferField.value === 1) {
+                        fourthLine += 'Data Transfer: Yes '
+                    } else if (dataTransferField.value === 0) {
+                        fourthLine += 'Data Transfer: No '
+                    }
+                }
+
+                const functionalityField =
+                    fields[config.customFieldMapping.functionality]
+                if (
+                    functionalityField?.value === 'Работает' &&
+                    !assetData.serial
+                ) {
+                    fourthLine += 'Working '
+                }
+
+                htmlContent = htmlContent.replace(
+                    /{{fourth_line}}/g,
+                    fourthLine || '—',
+                )
+
+                // Generate PDF for this asset
+                const page = await browser.newPage()
+                await page.setContent(htmlContent, {
+                    waitUntil: 'networkidle0',
+                })
+                const pdfBuffer = await page.pdf({
+                    width: `${pageOptions.width}mm`,
+                    height: `${pageOptions.height}mm`,
+                    printBackground: true,
+                })
+                await page.close()
+
+                pdfPages.push(pdfBuffer)
+
+                app.log.debug(`Generated label for asset ${assetId}`)
+            } catch (assetError) {
+                app.log.error(
+                    {
+                        error: assetError.message,
+                        asset_id: assetId,
+                    },
+                    'Failed to generate label for asset in batch',
+                )
+                // Continue with other assets even if one fails
+            }
+        }
+
+        if (pdfPages.length === 0) {
+            return reply.status(500).send({
+                error: 'Failed to generate any labels',
+                details: 'No assets could be processed successfully',
+            })
+        }
+
+        // Merge all PDFs into a single document using pdf-lib
+        const mergedPdfDoc = await PDFDocument.create()
+
+        for (const pdfBuffer of pdfPages) {
+            const pdf = await PDFDocument.load(pdfBuffer)
+            const pages = await mergedPdfDoc.copyPages(
+                pdf,
+                pdf.getPageIndices(),
+            )
+            pages.forEach((page) => mergedPdfDoc.addPage(page))
+        }
+
+        const mergedPdf = await mergedPdfDoc.save()
+
+        reply.header(
+            'Content-Disposition',
+            `attachment; filename="batch-labels-${template_type}-${Date.now()}.pdf"`,
+        )
+        reply.type('application/pdf').send(mergedPdf)
+
+        app.log.info(
+            {
+                asset_count: assetIdArray.length,
+                generated_count: pdfPages.length,
+                template_type,
+            },
+            'Batch labels generated successfully',
+        )
+    } catch (error) {
+        app.log.error(
+            {
+                error: error.message,
+                asset_ids: assetIdArray,
+                template_type,
+            },
+            'Batch label generation failed',
+        )
+
+        return reply.status(500).send({
+            error: 'Batch label generation failed',
+            details: error.message,
+        })
+    } finally {
+        if (browser) {
+            await browser.close()
+        }
     }
 })
 
