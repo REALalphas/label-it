@@ -1,6 +1,6 @@
 {
     "name": "label-it",
-    "version": "0.3",
+    "version": "0.32",
     "description": "Asset label generator with Snipe-IT integration. Supports multiple label formats including QR codes, barcodes, and DataMatrix codes.",
     "main": "index.js",
     "scripts": {

@@ -9,43 +9,69 @@
             body {
                 margin: 0;
                 font-family: Arial, sans-serif;
-                font-size: 8pt;
-                display: flex;
-            }
-            .half {
-                width: 50%;
-                height: 100%;
-                box-sizing: border-box;
-                padding: 2mm;
+                font-size: 6pt;
                 display: flex;
                 flex-direction: column;
+                justify-content: space-between;
+                align-items: center;
+                height: 40mm;
+                width: 100%;
+            }
+            .half {
+                height: fit-content;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
                 justify-content: center;
+                gap: 0.5mm;
+                padding: 1mm;
             }
-            .left {
-                text-align: left;
+            .top {
             }
-            .right {
-                text-align: right;
-            } /* Правая часть будет клеиться поверх левой */
-            p {
-                margin: 1mm 0;
+            .bottom {
+                transform: rotate(180deg);
             }
-            img {
-                max-width: 15mm;
-                max-height: 15mm;
+            .datamatrix {
+                width: 8mm;
+                height: 8mm;
                 image-rendering: pixelated;
+            }
+            .text-line {
+                font-size: 5pt;
+                font-weight: bold;
+                text-align: center;
+                line-height: 1.1;
+                margin: 0.2mm 0;
+                max-width: 10mm;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                hyphens: auto;
+            }
+            .asset-tag {
+                font-family: monospace;
+                font-size: 4.5pt;
+                font-weight: bold;
+            }
+            .asset-name {
+                font-size: 4pt;
+                font-weight: normal;
             }
         </style>
     </head>
     <body>
-        <div class="half left">
-            <p><strong>{{asset_tag}}</strong></p>
-            <p>{{asset_name}}</p>
+        <!-- Левая половина - нормальная ориентация -->
+        <div class="half top">
+            <img src="{{datamatrix_image}}" class="datamatrix" />
+            <div class="text-line asset-tag">{{asset_tag}}</div>
+            <div class="text-line asset-name">{{asset_name}}</div>
         </div>
-        <!-- Эта часть заворачивается и клеится с обратной стороны, создавая флажок -->
-        <div class="half right">
-            <p><strong>{{asset_tag}}</strong></p>
-            <p>{{asset_name}}</p>
+
+        <!-- Правая половина - перевернутая на 180 градусов -->
+        <div class="half bottom">
+            <img src="{{datamatrix_image}}" class="datamatrix" />
+            <div class="text-line asset-tag">{{asset_tag}}</div>
+            <div class="text-line asset-name">{{asset_name}}</div>
         </div>
     </body>
 </html>

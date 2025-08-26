@@ -170,7 +170,7 @@ app.post('/generate-batch', async (request, reply) => {
                             text: assetData.asset_tag,
                             scale: 5,
                         })
-                        htmlContent = htmlContent.replace(
+                        htmlContent = htmlContent.replaceAll(
                             '{{datamatrix_image}}',
                             `data:image/png;base64,${pngBuffer.toString('base64')}`,
                         )
@@ -181,6 +181,15 @@ app.post('/generate-batch', async (request, reply) => {
                         htmlContent = await fs.readFile(
                             path.join(__dirname, 'template_cable_flag.html'),
                             'utf-8',
+                        )
+                        const cablePngBuffer = await bwipjs.toBuffer({
+                            bcid: 'datamatrix',
+                            text: assetData.asset_tag,
+                            scale: 3,
+                        })
+                        htmlContent = htmlContent.replaceAll(
+                            '{{datamatrix_image}}',
+                            `data:image/png;base64,${cablePngBuffer.toString('base64')}`,
                         )
                         pageOptions = { width: 12, height: 40, unit: 'mm' }
                         break
@@ -198,7 +207,7 @@ app.post('/generate-batch', async (request, reply) => {
                             text: assetUrlMed,
                             scale: 3,
                         })
-                        htmlContent = htmlContent.replace(
+                        htmlContent = htmlContent.replaceAll(
                             '{{qr_code_image}}',
                             `data:image/png;base64,${qrPngBufferMed.toString('base64')}`,
                         )
@@ -210,7 +219,7 @@ app.post('/generate-batch', async (request, reply) => {
                             height: 4,
                             includetext: false,
                         })
-                        htmlContent = htmlContent.replace(
+                        htmlContent = htmlContent.replaceAll(
                             '{{barcode_image}}',
                             `data:image/png;base64,${barcodePngBufferMed.toString('base64')}`,
                         )
@@ -229,7 +238,7 @@ app.post('/generate-batch', async (request, reply) => {
                             text: assetUrl,
                             scale: 3,
                         })
-                        htmlContent = htmlContent.replace(
+                        htmlContent = htmlContent.replaceAll(
                             '{{qr_code_image}}',
                             `data:image/png;base64,${qrPngBuffer.toString('base64')}`,
                         )
@@ -241,7 +250,7 @@ app.post('/generate-batch', async (request, reply) => {
                             height: 4,
                             includetext: false,
                         })
-                        htmlContent = htmlContent.replace(
+                        htmlContent = htmlContent.replaceAll(
                             '{{barcode_image}}',
                             `data:image/png;base64,${barcodePngBuffer.toString('base64')}`,
                         )
@@ -249,23 +258,23 @@ app.post('/generate-batch', async (request, reply) => {
                 }
 
                 // Replace template variables with asset data (same as single generate)
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     /{{company_name}}/g,
                     config.companyName,
                 )
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     /{{asset_tag}}/g,
                     assetData.asset_tag,
                 )
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     /{{asset_name}}/g,
                     assetData.name || assetData.model.name,
                 )
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     /{{first_line}}/g,
                     assetData.category.name,
                 )
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     /{{second_line}}/g,
                     assetData.name ? assetData.name : assetData.model.name,
                 )
@@ -304,7 +313,7 @@ app.post('/generate-batch', async (request, reply) => {
                         ' '
                 }
 
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     /{{third_line}}/g,
                     thirdLine || '—',
                 )
@@ -334,7 +343,7 @@ app.post('/generate-batch', async (request, reply) => {
                     fourthLine += 'Working '
                 }
 
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     /{{fourth_line}}/g,
                     fourthLine || '—',
                 )
@@ -389,7 +398,7 @@ app.post('/generate-batch', async (request, reply) => {
 
         const timestamp = new Date()
             .toISOString()
-            .replace(/[:.]/g, '-')
+            .replaceAll(/[:.]/g, '-')
             .slice(0, -5)
         reply.header(
             'Content-Disposition',
@@ -477,7 +486,7 @@ app.post('/generate', async (request, reply) => {
                     text: assetData.asset_tag,
                     scale: 5,
                 })
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     '{{datamatrix_image}}',
                     `data:image/png;base64,${pngBuffer.toString('base64')}`,
                 )
@@ -488,6 +497,15 @@ app.post('/generate', async (request, reply) => {
                 htmlContent = await fs.readFile(
                     path.join(__dirname, 'template_cable_flag.html'),
                     'utf-8',
+                )
+                const cablePngBufferBatch = await bwipjs.toBuffer({
+                    bcid: 'datamatrix',
+                    text: assetData.asset_tag,
+                    scale: 3,
+                })
+                htmlContent = htmlContent.replaceAll(
+                    '{{datamatrix_image}}',
+                    `data:image/png;base64,${cablePngBufferBatch.toString('base64')}`,
                 )
                 pageOptions = { width: 12, height: 40, unit: 'mm' }
                 break
@@ -505,7 +523,7 @@ app.post('/generate', async (request, reply) => {
                     text: assetUrlMed,
                     scale: 3,
                 })
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     '{{qr_code_image}}',
                     `data:image/png;base64,${qrPngBufferMed.toString('base64')}`,
                 )
@@ -517,7 +535,7 @@ app.post('/generate', async (request, reply) => {
                     height: 4,
                     includetext: false,
                 })
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     '{{barcode_image}}',
                     `data:image/png;base64,${barcodePngBufferMed.toString('base64')}`,
                 )
@@ -536,7 +554,7 @@ app.post('/generate', async (request, reply) => {
                     text: assetUrl,
                     scale: 3,
                 })
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     '{{qr_code_image}}',
                     `data:image/png;base64,${qrPngBuffer.toString('base64')}`,
                 )
@@ -548,7 +566,7 @@ app.post('/generate', async (request, reply) => {
                     height: 4,
                     includetext: false,
                 })
-                htmlContent = htmlContent.replace(
+                htmlContent = htmlContent.replaceAll(
                     '{{barcode_image}}',
                     `data:image/png;base64,${barcodePngBuffer.toString('base64')}`,
                 )
@@ -556,20 +574,23 @@ app.post('/generate', async (request, reply) => {
         }
 
         // Replace template variables with asset data
-        htmlContent = htmlContent.replace(
+        htmlContent = htmlContent.replaceAll(
             /{{company_name}}/g,
             config.companyName,
         )
-        htmlContent = htmlContent.replace(/{{asset_tag}}/g, assetData.asset_tag)
-        htmlContent = htmlContent.replace(
+        htmlContent = htmlContent.replaceAll(
+            /{{asset_tag}}/g,
+            assetData.asset_tag,
+        )
+        htmlContent = htmlContent.replaceAll(
             /{{asset_name}}/g,
             assetData.name || assetData.model.name,
         )
-        htmlContent = htmlContent.replace(
+        htmlContent = htmlContent.replaceAll(
             /{{first_line}}/g,
             assetData.category.name,
         )
-        htmlContent = htmlContent.replace(
+        htmlContent = htmlContent.replaceAll(
             /{{second_line}}/g,
             assetData.name ? assetData.name : assetData.model.name,
         )
@@ -606,7 +627,10 @@ app.post('/generate', async (request, reply) => {
                 fields[config.customFieldMapping.battery_size].value + ' '
         }
 
-        htmlContent = htmlContent.replace(/{{third_line}}/g, thirdLine || '—')
+        htmlContent = htmlContent.replaceAll(
+            /{{third_line}}/g,
+            thirdLine || '—',
+        )
 
         // Build fourth line
         let fourthLine = ''
@@ -632,7 +656,10 @@ app.post('/generate', async (request, reply) => {
             fourthLine += 'Working '
         }
 
-        htmlContent = htmlContent.replace(/{{fourth_line}}/g, fourthLine || '—')
+        htmlContent = htmlContent.replaceAll(
+            /{{fourth_line}}/g,
+            fourthLine || '—',
+        )
 
         // Generate PDF or PNG using Puppeteer
         browser = await puppeteer.launch({
@@ -660,13 +687,16 @@ app.post('/generate', async (request, reply) => {
                 printBackground: true,
             })
 
-            const assetTag = assetData.asset_tag.replace(/[^a-zA-Z0-9]/g, '-')
+            const assetTag = assetData.asset_tag.replaceAll(
+                /[^a-zA-Z0-9]/g,
+                '-',
+            )
             const assetName = (
                 assetData.name ||
                 assetData.model.name ||
                 'asset'
             )
-                .replace(/[^a-zA-Z0-9]/g, '-')
+                .replaceAll(/[^a-zA-Z0-9]/g, '-')
                 .substring(0, 30)
             reply.header(
                 'Content-Disposition',
